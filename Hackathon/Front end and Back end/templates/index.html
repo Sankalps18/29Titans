@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Issue Reports</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div style="position: fixed;top: 0;left: 0;width: 100%;background-color: #1e293b;padding: 20px 40px;display: flex;align-items: center;justify-content: space-between;z-index: 1000;box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">
+<div style="color: white; font-weight: bold; font-size: 24px;">Issue<span style="color: #60a5fa;">Classifier</span></div>
+<div style="display: flex; gap: 40px;">
+  <a href="#" style="color: white; text-decoration: none; font-weight: bold;">Home</a>
+  <a href="#" style="color: white; text-decoration: none; font-weight: bold;">Classify</a>
+  <a href="#" style="color: white; text-decoration: none; font-weight: bold;">Reviews</a>
+</div>
+<div onclick="handleProfileClick()" style="background-color: #6366f1; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+  <span style="color: white; font-size: 22px;">👤</span>
+</div>
+</div>
+<script>
+function handleProfileClick() {
+  alert("Profile icon clicked!");
+}
+</script>
+<div style="padding-top: 100px;">
+
+
+<!-- Hero Section -->
+<div style="
+background: linear-gradient(to right, #5b67f3, #4b5ee0);
+padding: 80px 20px;
+text-align: center;
+color: white;
+">
+<h1 style="font-size: 48px; margin: 0;">Welcome to Smart Issue Classifier</h1>
+<p style="font-size: 18px; margin-top: 15px;">We help you reach the right team in seconds 🚀</p>
+</div>
+
+<!-- Login Form Section -->
+<div style="
+max-width: 400px;
+margin: 60px auto;
+background-color: #e6edff;
+padding: 40px 30px;
+border-radius: 12px;
+text-align: center;
+font-family: 'Segoe UI', sans-serif;
+">
+<h2 style="
+  margin-bottom: 30px;
+  font-size: 28px;
+  color: #1e293b;
+">Login</h2>
+
+<input
+  type="email"
+  id="email"
+  placeholder="Email"
+  style="
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  "
+>
+
+<input
+  type="password"
+  id="password"
+  placeholder="Password"
+  style="
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 25px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  "
+>
+
+<button
+  onclick="loginUser()"
+  style="
+    width: 100%;
+    background-color: #4f46e5;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  "
+>
+  Login
+</button>
+</div>
+
+<!-- Inline JavaScript -->
+<script>
+function loginUser() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
+  alert("Logging in with\nEmail: " + email + "\nPassword: " + password);
+}
+</script>
+
+<h1 style="font-size: 48px; margin: 0;font-style: italic;text-align: center;
+color: blue;">Classified Issues:</h1><br><br>
+
+</div>
+<div class="container">
+  <h2>Wrong Order Delivery</h2>
+  <table>
+    {% if deliveries %}
+      <tr>
+        {% for key in deliveries[0].keys() %}
+          <th>{{ key.replace('_', ' ')|title }}</th>
+        {% endfor %}
+      </tr>
+      {% for delivery in deliveries %}
+        <tr>
+          {% for value in delivery.values() %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="100%" class="no-data">No wrong order deliveries found</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div class="container">
+  <h2>Product Defect</h2>
+  <table>
+    {% if defects %}
+      <tr>
+        {% for key in defects[0].keys() %}
+          <th>{{ key.replace('_', ' ')|title }}</th>
+        {% endfor %}
+      </tr>
+      {% for defect in defects %}
+        <tr>
+          {% for value in defect.values() %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="100%" class="no-data">No product defects found</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div class="container">
+  <h2>Late Delivery</h2>
+  <table>
+    {% if late_deliveries %}
+      <tr>
+        {% for key in late_deliveries[0].keys() %}
+          <th>{{ key.replace('_', ' ')|title }}</th>
+        {% endfor %}
+      </tr>
+      {% for late in late_deliveries %}
+        <tr>
+          {% for value in late.values() %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="100%" class="no-data">No late deliveries found</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div class="container">
+  <h2>Technical Issues</h2>
+  <table>
+    {% if technichal_issues %}
+      <tr>
+        {% for key in technichal_issues[0].keys() %}
+          <th>{{ key.replace('_', ' ')|title }}</th>
+        {% endfor %}
+      </tr>
+      {% for issue in technichal_issues %}
+        <tr>
+          {% for value in issue.values() %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="100%" class="no-data">No technical issues found</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div class="container">
+  <h2>Other Issues</h2>
+  <table>
+    {% if other %}
+      <tr>
+        {% for key in other[0].keys() %}
+          <th>{{ key.replace('_', ' ')|title }}</th>
+        {% endfor %}
+      </tr>
+      {% for issue in other %}
+        <tr>
+          {% for value in issue.values() %}
+            <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="100%" class="no-data">No other issues found</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div style="height: 12px; padding: 20px;">
+   
+</div>
+<div onclick="footerClick()" style="background-color: #1e293b;color: white;text-align: center;padding: 15px 10px;font-size: 14px;border-top: 2px solid #6366f1;position: relative;bottom: 0;width: 100%;">
+  &copy; 2025 Issue Classifier | Built with <span style='color: #f87171;'>❤️</span> by Our Team
+TITANS</div>
+<script>
+function footerClick() {
+  alert("Thanks for checking out our footer!");
+}
+</script>
+</body>
+</html>

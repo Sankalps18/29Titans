@@ -1,0 +1,450 @@
+{
+  "name": "My",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1040,
+        40
+      ],
+      "id": "e67f5797-8602-42f2-9a3a-4a41af341e47",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1rci51svT9XDetjI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d6ddb98-75fc-4942-bab0-0be983bcd234",
+              "name": "Email Context",
+              "value": "=Sender Email Address:\n{{ $json.from.value[0].address }}\n\nEmail Subject:\n{{ $json.subject }}\n\nEmail Body:\n{{ $json.text }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -820,
+        40
+      ],
+      "id": "5f5a0dbd-8e23-4b8d-9203-b5a275775bc0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nPrompt:\n\nGiven an email, classify it into one of the following issue types:  \n\n1. Late Delivery \n2. Wrong Order Delivered  \n3. Product Defect  \n4. Technical Issues  \n5. Others  \n\nReturn a JSON object** with the following structure:  \n\njson\n{\n  \"issue_type\": X\n}\n\n\nWhere X is the number corresponding to the identified issue type.  \n\nEnsure that:  \n- The classification is accurate based on the email content.  \n- Only the required JSON object is returned, with no extra text or explanations.  \n- If the email does not clearly fall into types 1-4, classify it as **5 (Others)**.  \n\nExample:  \n\nInput Email:  \n\"Hello, I ordered a laptop, but it has a broken screen. Please help!\"  \n\nOutput JSON:  \njson\n{\n  \"issue_type\": 3\n}\n\n{{ $json['Email Context'] }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -600,
+        40
+      ],
+      "id": "c570d8c9-6b26-40ee-9ea4-c0ca99c90290",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"issue_type\": {\n      \"type\": \"integer\"\n    },\n    \"cities\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        280
+      ],
+      "id": "9c112c65-ee34-4a5c-a9c8-9f3100de51d9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        240
+      ],
+      "id": "8410444c-705e-429e-aefd-40c0fb12be87",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1f7vdrxhRPC0fkOr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 6,
+        "output": "={{ $json.output.issue_type }}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -260,
+        40
+      ],
+      "id": "1af96fb0-4f61-484b-902a-401864bb0e7d",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "late_delivery",
+          "mode": "list",
+          "cachedResultName": "late_delivery"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "customer",
+              "value": "={{ $('Gmail Trigger').item.json.headers.from }}"
+            },
+            {
+              "column": "Date_time",
+              "value": "={{ $('Gmail Trigger').item.json.headers.date }}"
+            },
+            {
+              "column": "email_text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -40,
+        -200
+      ],
+      "id": "5ae418bb-2fcf-45f6-861a-847afea8c07d",
+      "name": "MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "VzR0pJ7iMRmbyle8",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "wrong_order_delivery",
+          "mode": "list",
+          "cachedResultName": "wrong_order_delivery"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "customer",
+              "value": "={{ $('Gmail Trigger').item.json.headers.from }}"
+            },
+            {
+              "column": "Date_time",
+              "value": "={{ $('Gmail Trigger').item.json.headers.date }}"
+            },
+            {
+              "column": "email_text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -40,
+        -20
+      ],
+      "id": "9517ca76-6448-4960-bef7-95d1a341c720",
+      "name": "MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "VzR0pJ7iMRmbyle8",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "technical_issues",
+          "mode": "list",
+          "cachedResultName": "technical_issues"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "customer",
+              "value": "={{ $('Gmail Trigger').item.json.headers.from }}"
+            },
+            {
+              "column": "Date_time",
+              "value": "={{ $('Gmail Trigger').item.json.headers.date }}"
+            },
+            {
+              "column": "email_text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -40,
+        300
+      ],
+      "id": "badd7b72-6172-48b0-934e-18dacf8dcefc",
+      "name": "MySQL2",
+      "credentials": {
+        "mySql": {
+          "id": "VzR0pJ7iMRmbyle8",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "prodect_defect",
+          "mode": "list",
+          "cachedResultName": "prodect_defect"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "customer",
+              "value": "={{ $('Gmail Trigger').item.json.headers.from }}"
+            },
+            {
+              "column": "Date_time",
+              "value": "={{ $('Gmail Trigger').item.json.headers.date }}"
+            },
+            {
+              "column": "email_text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -40,
+        140
+      ],
+      "id": "a06b106c-b984-44f4-9f30-84cd2ea15e65",
+      "name": "MySQL3",
+      "credentials": {
+        "mySql": {
+          "id": "VzR0pJ7iMRmbyle8",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "other",
+          "mode": "list",
+          "cachedResultName": "other"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "customer",
+              "value": "={{ $('Gmail Trigger').item.json.headers.from }}"
+            },
+            {
+              "column": "Date_time",
+              "value": "={{ $('Gmail Trigger').item.json.headers.date }}"
+            },
+            {
+              "column": "email_text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -40,
+        480
+      ],
+      "id": "37a350cb-4e02-43a0-9f90-34e97cb6e73e",
+      "name": "MySQL4",
+      "credentials": {
+        "mySql": {
+          "id": "VzR0pJ7iMRmbyle8",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MySQL3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MySQL2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MySQL4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL": {
+      "main": [
+        []
+      ]
+    },
+    "MySQL1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bc3e704d-b812-4058-8d17-b4d3fe7502a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "add998bb2e46fbec6370d82e707ac5425a4c3410d89d9033b7a2ba2d1163b9ff"
+  },
+  "id": "qEqvqtJInOf2tEBv",
+  "tags": []
+}
